@@ -1,0 +1,23 @@
+{
+    "name": "auto-build",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "clean": "rimraf dist",
+        "build": "npm run clean && npm install && tsc",
+        "only-build": "tsc"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@xuyanfeng/svn": "^0.0.1",
+        "execa": "^5.0.0",
+        "fs-extra": "^11.1.0",
+        "lodash": "^4.17.21",
+        "rimraf": "^5.0.5"
+    },
+    "devDependencies": {
+        "@types/fs-extra": "^11.0.3"
+    }
+}

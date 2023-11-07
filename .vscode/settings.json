@@ -1,0 +1,6 @@
+{
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "modifications",
+  "editor.indentSize": "tabSize",
+  "editor.tabSize": 2
+}
