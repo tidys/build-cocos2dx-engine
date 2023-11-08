@@ -1,0 +1,10 @@
+{
+  "version": "v1",
+  "packages": {
+    "@xuyanfeng/svn": {
+      "signature": "e4673415cf2b8acfc4907f674b8883e7",
+      "file": true,
+      "replaced": "^0.0.1"
+    }
+  }
+}

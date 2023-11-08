@@ -2,9 +2,11 @@ import { SVN, SVNOptions } from "@xuyanfeng/svn";
 import { commandSync, command } from "execa";
 import { spawn } from "child_process";
 import {
+  emptydirSync,
   emptyDirSync,
   ensureDirSync,
   existsSync,
+  moveSync,
   readFileSync,
   removeSync,
   writeFileSync,
@@ -15,10 +17,17 @@ import { homedir } from "os";
 import { getInstalledApps } from "get-installed-apps";
 import { APP } from "./const";
 import { decode } from "iconv-lite";
+import { glob, Glob } from "glob";
 const rootDir = join(__dirname, "../build");
 
 function getSln(): string | null {
-  const sln = join(rootDir, "runtime-src", "proj.win32", "tank5.sln");
+  const sln = join(
+    rootDir,
+    "frameworks",
+    "runtime-src",
+    "proj.win32",
+    "tank5.sln"
+  );
   if (existsSync(sln)) {
     return sln;
   }
@@ -74,17 +83,58 @@ async function getVs(): Promise<string | null> {
   }
   return null;
 }
+const svn = new SVN();
+
+async function commitBuildResult(debug: boolean) {
+  let srcDir, destDir;
+
+  if (debug) {
+    srcDir = rootDir;
+    destDir = join(rootDir, "build", "debug");
+  } else {
+    srcDir = join(rootDir, "simulator", "win32");
+    destDir = join(rootDir, "build", "release");
+  }
+
+  if (!srcDir || !destDir) {
+    return;
+  }
+  emptydirSync(destDir);
+  const files = await glob(
+    [
+      `${srcDir}/*.exe`,
+      `${srcDir}/*.dll`,
+      // `${distDir}/*.pdb`,
+    ],
+    { absolute: true }
+  );
+  console.log(files);
+  const destFiles: string[] = [];
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const dest = join(destDir, basename(file));
+    destFiles.push(dest);
+    moveSync(file, dest, { overwrite: true });
+  }
+  svn.push(destFiles);
+}
 
 (async () => {
   // removeSync(rootDir);
   ensureDirSync(rootDir);
-  // const svn = new SVN();
-  // svn.init({
-  //   repo: "http://192.168.1.39:8080/svn/realTimeBattle/client/frameworks",
-  //   dir: rootDir,
-  //   checkout: true,
-  //   filter: ["cocos2d-x", "runtime-src/Classes", "runtime-src/proj.win32"],
-  // });
+  svn.autoLog = "build";
+  svn.init({
+    repo: "http://192.168.1.39:8080/svn/realTimeBattle/client/",
+    dir: rootDir,
+    checkout: true,
+    filter: [
+      "frameworks/cocos2d-x",
+      "frameworks/runtime-src/Classes",
+      "frameworks/runtime-src/proj.win32",
+      "build/debug",
+      "build/release",
+    ],
+  });
   const sln = getSln();
   if (!sln) {
     console.error(`no sln found: ${sln}`);
@@ -96,16 +146,27 @@ async function getVs(): Promise<string | null> {
     return;
   }
 
-  function buildWith2() {
-    const process = spawn(vs!, [sln!, "/Build", "Debug|Win32"]);
-    process.stdout.on("data", (str) => {
-      console.log(decode(str, "gbk"));
-    });
-    process.stderr.on("data", (str) => {
-      console.log(decode(str, "gbk"));
-    });
-    process.on("close", () => {
-      console.log("close");
+  async function buildWith2(debug: boolean = true) {
+    return new Promise((resolve, reject) => {
+      const process = spawn(
+        vs!,
+        debug
+          ? [sln!, "/Build", "Debug|Win32"]
+          : [sln!, "/Build", "Release|Win32"]
+      );
+      process.stdout.on("data", (str) => {
+        console.log(decode(str, "gbk"));
+      });
+      process.stderr.on("data", (str) => {
+        console.log(decode(str, "gbk"));
+        reject(1);
+      });
+      process.on("close", async () => {
+        console.log(`build ${debug ? "debug" : "release"} finished`);
+        // 将结果复制到对应的目录里面，懒得再分析 msbuild 的构建参数了
+        await commitBuildResult(debug);
+        resolve(0);
+      });
     });
   }
   function buildWith1() {
@@ -124,5 +185,7 @@ async function getVs(): Promise<string | null> {
     });
   }
   // buildWith1();
-  buildWith2();
+  await buildWith2(true); // build debug
+  await buildWith2(false); // build release
+  console.log("build finish");
 })();

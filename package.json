@@ -11,9 +11,13 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "@xuyanfeng/svn": "^0.0.1",
+        "@types/glob": "^8.1.0",
+        "@xuyanfeng/svn": "file:.yalc/@xuyanfeng/svn",
         "execa": "^5.0.0",
         "fs-extra": "^11.1.0",
+        "get-installed-apps": "^1.1.0",
+        "glob": "^10.3.10",
+        "iconv-lite": "^0.6.3",
         "lodash": "^4.17.21",
         "rimraf": "^5.0.5"
     },
