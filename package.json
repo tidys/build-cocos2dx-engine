@@ -5,14 +5,14 @@
     "main": "index.js",
     "scripts": {
         "clean": "rimraf dist",
-        "build": "npm run clean && npm install && tsc",
+        "build": "npm install && npm run clean &&  tsc",
         "only-build": "tsc"
     },
     "author": "",
     "license": "ISC",
     "dependencies": {
         "@types/glob": "^8.1.0",
-        "@xuyanfeng/svn": "file:.yalc/@xuyanfeng/svn",
+        "@xuyanfeng/svn": "0.0.2",
         "execa": "^5.0.0",
         "fs-extra": "^11.1.0",
         "get-installed-apps": "^1.1.0",

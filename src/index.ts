@@ -16,7 +16,7 @@ import { homedir } from "os";
 // @ts-ignore
 import { getInstalledApps } from "get-installed-apps";
 import { APP } from "./const";
-import { decode } from "iconv-lite";
+import { decode, encode } from "iconv-lite";
 import { glob, Glob } from "glob";
 const rootDir = join(__dirname, "../build");
 
@@ -136,11 +136,13 @@ async function commitBuildResult(debug: boolean) {
     ],
   });
   const sln = getSln();
+  console.log(`sln: ${sln}`);
   if (!sln) {
     console.error(`no sln found: ${sln}`);
     return;
   }
   const vs = await getVs();
+  console.log(`vs: ${vs}`);
   if (!vs) {
     console.error(`no vs found: ${vs}`);
     return;
@@ -156,6 +158,7 @@ async function commitBuildResult(debug: boolean) {
       );
       process.stdout.on("data", (str) => {
         console.log(decode(str, "gbk"));
+        // console.log(encode(str, "utf-8").toString());
       });
       process.stderr.on("data", (str) => {
         console.log(decode(str, "gbk"));
