@@ -147,7 +147,13 @@ async function commitBuildResult(debug: boolean) {
     console.error(`no vs found: ${vs}`);
     return;
   }
-
+  function log(str: any) {
+    if (process.env.vscode) {
+      console.log(decode(str, "gbk"));
+    } else {
+      console.log(str.toString());
+    }
+  }
   async function buildWith2(debug: boolean = true) {
     return new Promise((resolve, reject) => {
       const process = spawn(
@@ -157,11 +163,10 @@ async function commitBuildResult(debug: boolean) {
           : [sln!, "/Build", "Release|Win32"]
       );
       process.stdout.on("data", (str) => {
-        console.log(decode(str, "gbk"));
-        // console.log(encode(str, "utf-8").toString());
+        log(str);
       });
       process.stderr.on("data", (str) => {
-        console.log(decode(str, "gbk"));
+        log(str);
         reject(1);
       });
       process.on("close", async () => {
@@ -178,10 +183,10 @@ async function commitBuildResult(debug: boolean) {
     console.log(cmd);
     const process = command(cmd);
     process.stdout?.on("data", (str: Buffer) => {
-      console.log(decode(str, "gbk"));
+      log(str);
     });
     process.stderr?.on("data", (str: Buffer) => {
-      console.log(decode(str, "gbk"));
+      log(str);
     });
     process.on("close", () => {
       console.log("build finish");

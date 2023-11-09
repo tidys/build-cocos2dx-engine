@@ -11,6 +11,9 @@
       "preLaunchTask": "npm: only-build",
       "program": "${workspaceFolder}/dist/index.js",
       "skipFiles": ["<node_internals>/**"],
+      "env": {
+        "vscode": "true"
+      }
     }
   ]
 }
