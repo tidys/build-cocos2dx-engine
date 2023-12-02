@@ -149,8 +149,8 @@ export class BuildEngine {
     this.switchToDebug(true);
     await this.buildWith2(); // build debug
 
-    // this.switchToDebug(false);
-    // await buildWith2(); // build release
+    this.switchToDebug(false);
+    await this.buildWith2(); // build release
   }
 
   private buildWith1() {
